@@ -1,0 +1,273 @@
+import React, { Component } from "react";
+
+class Xbox extends Component {
+  state = {
+    Name: "",
+    Brand: "",
+    Gallery: [],
+    stuffs: [],
+    Prices: "",
+    Price_ID: "Price",
+    Description: "",
+    symbol: "",
+    inStock: "",
+    Capacity: "",
+    AllCapacity: [],
+    activeButton: "512G",
+    colorActiveButton: "#44FF03",
+    colorInactiveButtons: [],
+    Color: "",
+    swatchColor: [],
+    AllPrices: [],
+    ID: "xbox-series-s",
+    hasColor: true,
+  };
+
+  componentDidMount() {
+    fetch("http://localhost:4000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `
+        query {
+            product(id: "xbox-series-s") {
+              id
+              name
+              description
+              gallery
+              inStock
+              category
+              brand
+              attributes {
+                id
+                name
+                type
+                items {
+                displayValue
+                  value
+                  id
+                }
+              }
+              prices{
+                currency{
+                  label
+                  symbol
+                }
+                amount
+              }
+            }
+          }
+        `,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        this.setState({
+          stuffs: data.data.product,
+          Gallery: data.data.product.gallery,
+          Brand: data.data.product.brand,
+          Name: data.data.product.name,
+          Prices: data.data.product.prices[0].amount,
+          Description: data.data.product.description,
+          symbol: data.data.product.prices[0].currency.symbol,
+          Capacity: data.data.product.attributes[1].name,
+          AllCapacity: data.data.product.attributes[1].items,
+          Color: data.data.product.attributes[0].name,
+          swatchColor: data.data.product.attributes[0].items,
+          AllPrices: data.data.product.prices,
+          inStock: data.data.product.inStock,
+        });
+      });
+  }
+  render() {
+    const Image = this.state.Gallery;
+    const Brand = this.state.Brand;
+    const Name = this.state.Name;
+    const Amount = this.state.Prices;
+    const Description = this.state.Description;
+    const Symbol = this.state.symbol;
+    const Capacity = this.state.Capacity;
+    const AllCapacity = this.state.AllCapacity;
+    const swatchColor = this.state.swatchColor;
+    const Color = this.state.Color;
+    const InStock = this.state.inStock;
+    console.log(this.state.AllPrices);
+
+    const mini_0 = () => {
+      document.getElementById("bigImg").setAttribute("src", Image[0]);
+    };
+
+    const mini_1 = () => {
+      document.getElementById("bigImg").setAttribute("src", Image[1]);
+    };
+
+    const mini_2 = () => {
+      document.getElementById("bigImg").setAttribute("src", Image[2]);
+    };
+
+    const mini_3 = () => {
+      document.getElementById("bigImg").setAttribute("src", Image[3]);
+    };
+
+    const mini_4 = () => {
+      document.getElementById("bigImg").setAttribute("src", Image[4]);
+    };
+
+    const handleClick = (text) => {
+      this.setState({
+        activeButton: text,
+        ID: text,
+        inactiveButtons: AllCapacity.filter(
+          (eachCapacity) => eachCapacity.value !== text
+        ),
+      });
+    };
+
+    const colorHandleClick = (text) => {
+      this.setState({
+        colorActiveButton: text,
+        ID: text,
+        colorInactiveButtons: swatchColor.filter((col) => col.value !== text),
+      });
+    };
+
+    return (
+      <div>
+        <div className="pdp">
+          <div className="mini-img">
+            <img
+              onClick={mini_0}
+              src={Image[0]}
+              className="imageee"
+              alt="imageee"
+            />
+
+            <img
+              onClick={mini_1}
+              src={Image[1]}
+              className="imageee"
+              alt="imageee"
+            />
+
+            <img
+              onClick={mini_2}
+              src={Image[2]}
+              className="imageee"
+              alt="imageee"
+            />
+
+            <img
+              onClick={mini_3}
+              src={Image[3]}
+              className="imageee"
+              alt="imageee"
+            />
+
+            <img
+              onClick={mini_4}
+              src={Image[4]}
+              className="imageee"
+              alt="imageee"
+            />
+          </div>
+
+          <img className="skate" id="bigImg" src={Image[0]} alt="skateboard" />
+
+          <div className="description1">
+            <div>
+              <h1>{Brand}</h1>
+              <h2 style={{ paddingBottom: 40 }}>{Name}</h2>
+            </div>
+
+            <h2>{Color}:</h2>
+
+            <div className="swatch">
+              {swatchColor.map((color) => {
+                return (
+                  <button
+                    ID={color.value}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      backgroundColor: color.value,
+                    }}
+                    onClick={() => colorHandleClick(color.value)}
+                    className={
+                      color.value === this.state.colorActiveButton
+                        ? "swatchActiveBtn"
+                        : ""
+                    }
+                    key={color.id}
+                  ></button>
+                );
+              })}
+            </div>
+
+            <b
+              className="typography"
+              style={{ marginBottom: 8, marginTop: 18 }}
+            >
+              {Capacity}:
+            </b>
+
+            <div style={{ marginBottom: 25 }}>
+              <div className="btnGroup">
+                {AllCapacity.map((eachCapacity) => {
+                  return (
+                    <button
+                      ID={eachCapacity.value}
+                      style={{ width: 63, height: 43, borderStyle: "solid" }}
+                      onClick={() => handleClick(eachCapacity.value)}
+                      className={
+                        eachCapacity.value === this.state.activeButton
+                          ? "active"
+                          : ""
+                      }
+                      key={eachCapacity.id}
+                    >
+                      {eachCapacity.value}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <b className="typography" style={{ marginBottom: 17 }}>
+              PRICE:
+            </b>
+
+            <b className="tag" style={{ marginBottom: 35 }}>
+              {Symbol} {Amount}
+            </b>
+
+            {InStock ? (
+              <button
+                className="add"
+                onClick={() => this.props.addToCart(this.state)}
+              >
+                ADD TO CART
+              </button>
+            ) : (
+              <button
+                style={{ cursor: "not-allowed" }}
+                className="out-of-stock"
+                onClick={() => alert(`${Name} is out of stock`)}
+              >
+                OUT OF STOCK
+              </button>
+            )}
+
+            <p className="properties-x">
+              <div
+                style={{ marginRight: 40 }}
+                dangerouslySetInnerHTML={{ __html: Description }}
+              />
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default Xbox;
